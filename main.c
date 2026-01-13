@@ -108,21 +108,24 @@ int main (void) {
 		project_batch(transformed_points, triangle_obj.num_points, &camera, &screen, projected_points);
 		
 		int order[triangle_obj.num_faces];
-		give_sorted_order(projected_points, triangle_obj.faces, triangle_obj.num_faces, order);
+		bool visible_faces[triangle_obj.num_faces];
+		give_sorted_order(projected_points, triangle_obj.faces, triangle_obj.num_faces, order, visible_faces);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		for (int i = 0; i < triangle_obj.num_faces; i++) {
 			int j = order[i];
-			glBegin(GL_TRIANGLES);
-				glColor3f(face_illuminations[j] + 0.1f, face_illuminations[j] + 0.1f, face_illuminations[j] + 0.1f);
+			if (visible_faces[i]) {
+				glBegin(GL_TRIANGLES);
+					glColor3f(face_illuminations[j] + 0.1f, face_illuminations[j] + 0.1f, face_illuminations[j] + 0.1f);
 
-				glVertex2f(projected_points[triangle_obj.faces[j][0]][0], projected_points[triangle_obj.faces[j][0]][2]);
+					glVertex2f(projected_points[triangle_obj.faces[j][0]][0], projected_points[triangle_obj.faces[j][0]][2]);
 
-				glVertex2f(projected_points[triangle_obj.faces[j][1]][0], projected_points[triangle_obj.faces[j][1]][2]);
+					glVertex2f(projected_points[triangle_obj.faces[j][1]][0], projected_points[triangle_obj.faces[j][1]][2]);
 
-				glVertex2f(projected_points[triangle_obj.faces[j][2]][0], projected_points[triangle_obj.faces[j][2]][2]);
-			glEnd();
+					glVertex2f(projected_points[triangle_obj.faces[j][2]][0], projected_points[triangle_obj.faces[j][2]][2]);
+				glEnd();
+			}
 		}
 
 		glfwSwapBuffers(window);

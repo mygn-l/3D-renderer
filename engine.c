@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define MAX_POINTS 32
 #define MAX_FACES 32
@@ -171,7 +172,7 @@ void illuminate_batch (float points[][3], int faces[][3], int num_faces, Object 
 	}
 }
 
-void give_sorted_order (float points[][3], int faces[][3], int num_faces, int order[]) {
+void give_sorted_order (float points[][3], int faces[][3], int num_faces, int order[], bool visible_faces[]) {
 	float averages[num_faces];
 	for (int i = 0; i < num_faces; i++) {
 		averages[i] = (points[faces[i][0]][1] + points[faces[i][1]][1] + points[faces[i][2]][1]) / 3;
@@ -187,5 +188,13 @@ void give_sorted_order (float points[][3], int faces[][3], int num_faces, int or
 		}
 		order[j + 1] = k;
 		averages[j + 1] = temp;
+	}
+	
+	for (int i = 0; i < num_faces; i++) {
+		if (averages[i] < 1.5f) {
+			visible_faces[i] = false;
+		} else {
+			visible_faces[i] = true;
+		}
 	}
 }
