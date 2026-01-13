@@ -2,6 +2,6 @@
 
 C, GLFW, OpenGL.
 
-##Features
+## Features
 
 OBJ parser. Camera movement. Directional lighting.
