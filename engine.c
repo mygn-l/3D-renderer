@@ -155,7 +155,7 @@ void project_batch (float points[][3], int n, Object *camera, Screen *screen, fl
 	}
 }
 
-void illuminate_batch (float points[][3], int faces[][3], int num_faces, Object *light, float target_illumination[]) {
+void directional_lighting_batch (float points[][3], int faces[][3], int num_faces, Object *light, Object *camera, float target_illumination[]) {
 	for (int i = 0; i < num_faces; i++) {
 		float diff1[3];
 		float diff2[3];
@@ -167,8 +167,35 @@ void illuminate_batch (float points[][3], int faces[][3], int num_faces, Object 
 		cross(diff1, diff2, cross_product);
 		normalize(cross_product);
 
-		float illumination = fmaxf(-dot(cross_product, light->position), 0);
-		target_illumination[i] = illumination;
+		float diffuse = fmaxf(-dot(cross_product, light->position), 0);
+		target_illumination[i] = diffuse;
+		
+		float average[3] = {
+			(points[faces[i][0]][0] + points[faces[i][1]][0] + points[faces[i][2]][0]) / 3.0f,
+			(points[faces[i][0]][1] + points[faces[i][1]][1] + points[faces[i][2]][1]) / 3.0f,
+			(points[faces[i][0]][2] + points[faces[i][1]][2] + points[faces[i][2]][2]) / 3.0f
+		};
+		float to_camera[3];
+		copy_vector(camera->position, to_camera);
+		sub(to_camera, average);
+		float diff[3];
+		copy_vector(to_camera, diff);
+		sub(diff, cross_product);
+		sub(to_camera, diff);
+		sub(to_camera, diff);
+		float specular = fmaxf(-dot(to_camera, light->position), 0);
+		target_illumination[i] += specular;
+	}
+}
+
+void final_illumination_batch (int num_faces, int num_illums, float illuminations[num_illums][num_faces], float final_illuminations[num_faces]) {
+	for (int i = 0; i < num_faces; i++) {
+		final_illuminations[i] = 0.0f;
+		for (int j = 0; j < num_illums; j++) {
+			final_illuminations[i] += illuminations[j][i];
+		}
+		final_illuminations[i] = (final_illuminations[i] >= 0) ? final_illuminations[i] : 0;
+		final_illuminations[i] = final_illuminations[i] / (1 + final_illuminations[i]); //y = x / (1 + x)
 	}
 }
 

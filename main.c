@@ -101,8 +101,15 @@ int main (void) {
 		float transformed_points[triangle_obj.num_points][3];
 		transform_batch(&triangle_obj, transformed_points);
 		
-		float face_illuminations[triangle_obj.num_faces];
-		illuminate_batch(transformed_points, triangle_obj.faces, triangle_obj.num_faces, &light, face_illuminations);
+		float directional_illuminations[triangle_obj.num_faces];
+		directional_lighting_batch(transformed_points, triangle_obj.faces, triangle_obj.num_faces, &light, &camera, directional_illuminations);
+		
+		float illuminations[1][triangle_obj.num_faces];
+		for (int i = 0; i < triangle_obj.num_faces; i++) {
+			illuminations[0][i] = directional_illuminations[i];
+		}
+		float final_illuminations[triangle_obj.num_faces];
+		final_illumination_batch(triangle_obj.num_faces, 1, illuminations, final_illuminations);
 
 		float projected_points[triangle_obj.num_points][3];
 		project_batch(transformed_points, triangle_obj.num_points, &camera, &screen, projected_points);
@@ -117,7 +124,7 @@ int main (void) {
 			int j = order[i];
 			if (visible_faces[i]) {
 				glBegin(GL_TRIANGLES);
-					glColor3f(face_illuminations[j] + 0.1f, face_illuminations[j] + 0.1f, face_illuminations[j] + 0.1f);
+					glColor3f(final_illuminations[j] + 0.1f, final_illuminations[j] + 0.1f, final_illuminations[j] + 0.1f);
 
 					glVertex2f(projected_points[triangle_obj.faces[j][0]][0], projected_points[triangle_obj.faces[j][0]][2]);
 
